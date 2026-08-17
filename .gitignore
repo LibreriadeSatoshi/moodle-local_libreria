@@ -1,0 +1,21 @@
+# Local dev environment (moodle-docker clone, moodle checkout)
+.dev/
+
+vendor/
+node_modules/
+*.log
+.env
+.env.*
+!.env.example
+
+# PHP
+composer.lock
+.phpunit.result.cache
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
