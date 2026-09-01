@@ -17,7 +17,12 @@ relabel the core language strings — which would change the wording in the
 gradebook, participant lists and profile pages too — this adds one line above
 the name fields:
 
-> You may use a pseudonym instead of your real name.
+> You may use a pseudonym instead of your real name. Whatever you enter here is
+> what will appear on your course certificates.
+
+The certificate sentence matters: `mod_customcert` renders these fields onto the
+issued certificate, so someone choosing a pseudonym should know that up front
+rather than discovering it after finishing a course.
 
 Implemented with the `extend_signup_form` callback (Moodle 3.8+) in `lib.php`.
 

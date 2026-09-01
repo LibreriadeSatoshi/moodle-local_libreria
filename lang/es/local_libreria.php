@@ -17,4 +17,4 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Ajustes de Librería de Satoshi';
-$string['pseudonote'] = 'Puedes usar un pseudónimo en lugar de tu nombre real.';
+$string['pseudonote'] = 'Puedes usar un pseudónimo en lugar de tu nombre real. Lo que escribas aquí es lo que aparecerá en tus certificados.';

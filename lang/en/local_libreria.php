@@ -17,4 +17,4 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Librería de Satoshi tweaks';
-$string['pseudonote'] = 'You may use a pseudonym instead of your real name.';
+$string['pseudonote'] = 'You may use a pseudonym instead of your real name. Whatever you enter here is what will appear on your course certificates.';
