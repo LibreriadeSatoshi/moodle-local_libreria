@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Site-wide tweaks for Librería de Satoshi.
@@ -14,14 +22,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Retain the plugin's existing direct-access guard.
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalNotNeeded
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Tell people on the signup form that a pseudonym is acceptable.
+ * Simplify email signup when enabled, otherwise retain the pseudonym note.
  *
- * Moodle hardcodes firstname and lastname as required on the signup form and
- * they cannot be removed through settings, so rather than relabel the core
- * strings site-wide we add one explanatory line above the name fields.
+ * The optional short form supplies blank-field defaults before core validation.
+ * The standard form keeps its existing required fields and explanatory note.
  *
  * Only applies to email self-registration. Nostr logins (auth_nostr) never
  * render this form, and the callback is not executed for the mobile app or
@@ -30,8 +39,19 @@ defined('MOODLE_INTERNAL') || die();
  * @param MoodleQuickForm $mform The signup form.
  */
 function local_libreria_extend_signup_form($mform) {
-    $mform->addElement('static', 'local_libreria_pseudonote', '',
-        get_string('pseudonote', 'local_libreria'));
+    global $CFG;
+
+    if ($CFG->registerauth === 'email' && get_config('local_libreria', 'simplifiedsignup')) {
+        \local_libreria\signup::extend_form($mform);
+        return;
+    }
+
+    $mform->addElement(
+        'static',
+        'local_libreria_pseudonote',
+        '',
+        get_string('pseudonote', 'local_libreria')
+    );
 
     // The callback runs after the core elements are defined, which would leave
     // the note at the bottom of the form. Move it up to the name fields.

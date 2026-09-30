@@ -1,0 +1,4 @@
+/* Keep signup actions below the fields when additional details are expanded. */
+#page-login-signup .local-libreria-simplified-signup [data-groupname="buttonar"] {
+    position: static;
+}

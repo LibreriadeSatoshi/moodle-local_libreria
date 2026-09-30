@@ -15,17 +15,22 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Version metadata for local_libreria.
+ * Settings for Libreria site customisations.
  *
- * @package    local_libreria
- * @copyright  2026 local_libreria contributors
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package local_libreria
+ * @copyright 2026 Libreria de Satoshi
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_libreria';
-$plugin->version   = 2026092500;
-$plugin->requires  = 2022112800;
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '0.2.0';
+if ($hassiteconfig) {
+    $settings = new admin_settingpage('local_libreria', get_string('pluginname', 'local_libreria'));
+    $settings->add(new admin_setting_configcheckbox(
+        'local_libreria/simplifiedsignup',
+        get_string('simplifiedsignup', 'local_libreria'),
+        get_string('simplifiedsignup_desc', 'local_libreria'),
+        0
+    ));
+    $ADMIN->add('localplugins', $settings);
+}
