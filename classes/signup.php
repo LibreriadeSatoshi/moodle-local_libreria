@@ -31,11 +31,11 @@ final class signup {
      */
     public static function extend_form(\MoodleQuickForm $mform): void {
         $mform->updateAttributes(['class' => $mform->getAttribute('class') . ' local-libreria-simplified-signup']);
-        $optional = ['username', 'email2', 'firstname', 'lastname', 'city', 'country'];
+        $optional = ['username', 'firstname', 'lastname', 'city', 'country'];
         $elements = [];
         foreach ($optional as $name) {
             $element = $mform->removeElement($name, false);
-            if (in_array($name, ['username', 'email2', 'firstname', 'lastname'], true)) {
+            if (in_array($name, ['username', 'firstname', 'lastname'], true)) {
                 $replacement = new \local_libreria\form\signup_text($name, $element->getLabel(), $element->getAttributes());
                 $replacement->set_force_ltr($element->get_force_ltr());
                 $elements[] = $replacement;
@@ -51,6 +51,42 @@ final class signup {
         // QuickForm tracks the required marker separately from validation rules.
         $mform->_required = array_values(array_diff($mform->_required, $optional));
 
+        // Core signup validation expects email2 even though users only enter email once.
+        $mform->removeElement('email2');
+        $mform->addElement(new \local_libreria\form\signup_email_confirmation('email2', '', ['id' => 'id_email2']));
+        $mform->setType('email2', \core_user::get_property_type('email'));
+
+        // Preserve custom field types, defaults and validation when moving optional fields.
+        $categories = [];
+        foreach (profile_get_signup_fields() as $field) {
+            $name = $field->object->inputname;
+            $config = $field->object->get_field_config_for_external();
+            $categories['category_' . $field->categoryid] = true;
+            if (empty($config['required']) && $mform->elementExists($name)) {
+                $elements[] = $mform->removeElement($name, false);
+            }
+        }
+        // Remove only category headers whose remaining contents are empty.
+        $emptyheaders = [];
+        $header = null;
+        $boundaries = $mform->defaultRenderer()->getStopFieldsetElements();
+        foreach ($mform->_elements as $element) {
+            if (in_array($element->getName(), $boundaries, true)) {
+                $header = null;
+            }
+            if ($element->getType() === 'header') {
+                $header = $element->getName();
+                if (isset($categories[$header])) {
+                    $emptyheaders[$header] = true;
+                }
+            } else if ($element->getType() !== 'hidden' && $header !== null) {
+                unset($emptyheaders[$header]);
+            }
+        }
+        foreach (array_keys($emptyheaders) as $name) {
+            $mform->removeElement($name);
+        }
+
         // Move email before password and its policy help text.
         $before = $mform->elementExists('passwordpolicyinfo') ? 'passwordpolicyinfo' : 'password';
         $emailelement = $mform->removeElement('email', false);
@@ -63,12 +99,32 @@ final class signup {
         if ($submitted) {
             $attributes['open'] = 'open';
         }
-        $mform->addElement('html', \html_writer::start_tag('details', $attributes)
+        $details = [];
+        $details[] = $mform->createElement('html', \html_writer::start_tag('details', $attributes)
             . \html_writer::tag('summary', get_string('additionaldetails', 'local_libreria'), ['class' => 'mb-3']));
-        $mform->addElement('static', 'local_libreria_signupdefaults', '', get_string('signupdefaults', 'local_libreria'));
+        $details[] = $mform->createElement('static', 'local_libreria_signupdefaults', '',
+            get_string('signupdefaults', 'local_libreria'));
         foreach ($elements as $element) {
-            $mform->addElement($element);
+            $details[] = $element;
         }
-        $mform->addElement('html', \html_writer::end_tag('details'));
+        $details[] = $mform->createElement('html', \html_writer::end_tag('details'));
+
+        // Raw HTML does not close QuickForm fieldsets. Insert before the first header
+        // so the optional section never becomes a child of a custom field category.
+        $beforeheader = null;
+        foreach ($mform->_elements as $element) {
+            if ($element->getType() === 'header') {
+                $beforeheader = $element->getName();
+                break;
+            }
+        }
+        // QuickForm retains references, so each insertion needs its own array slot.
+        foreach (array_keys($details) as $index) {
+            if ($beforeheader !== null) {
+                $mform->insertElementBefore($details[$index], $beforeheader);
+            } else {
+                $mform->addElement($details[$index]);
+            }
+        }
     }
 }

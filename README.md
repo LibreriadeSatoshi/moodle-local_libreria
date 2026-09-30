@@ -7,7 +7,7 @@ a git submodule at `public/local/libreria` in
 ## Simplified email signup
 
 An optional setting keeps **email and password** visible and moves username,
-email confirmation, first name, last name, city and country into a collapsed
+first name, last name, city, country and optional custom profile fields into a collapsed
 **Additional details (optional)** section. It uses native HTML details, so it
 works with the keyboard and without JavaScript. The section opens after a
 submission to expose validation errors.
@@ -20,7 +20,6 @@ the form:
 | Username | Full email address, lowercased |
 | First name | Email address |
 | Last name | `.` |
-| Email confirmation | Email address |
 
 Explicitly entered values are preserved. Domains and special characters are not
 removed from generated usernames. Existing accounts are not rewritten, and
@@ -31,7 +30,10 @@ name format displays the first name.
 The plugin uses the existing `extend_signup_form` callback. Moodle still handles
 password policy, duplicate accounts, email restrictions, CAPTCHA, session keys,
 site-policy consent, account creation and email confirmation. Custom profile
-fields keep their existing visibility and requirements.
+fields keep their existing visibility and requirements. Required custom fields stay
+outside the optional section. The repeated email input is removed; the plugin
+supplies its value to core validation from the email input. Users still receive
+and must follow Moodle's confirmation email.
 
 ### Enable
 
@@ -92,8 +94,9 @@ the collapsed/expanded form structure.
 
 Before enabling on a site, check desktop and mobile signup with its theme: submit
 only email/password, follow the confirmation link, log out and log in again.
-Expand the details and repeat using a custom username and names; test a mismatched
-email confirmation and check that its error is visible. Test keyboard interaction
+Expand the details and repeat using a custom username and names. Check that optional
+custom fields appear in the same section and required custom fields remain visible
+and enforce their validation. Confirm there is no repeated email input. Test keyboard interaction
 with the section and ensure required policy/CAPTCHA controls remain visible.
 
 ## Deploying

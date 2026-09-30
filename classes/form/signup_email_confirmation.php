@@ -18,42 +18,25 @@ namespace local_libreria\form;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-require_once($CFG->libdir . '/form/text.php');
+require_once($CFG->libdir . '/form/hidden.php');
 
 /**
- * A normal text input whose blank value receives a default only when exported.
- *
- * Keeping the rendered input blank prevents a failed signup from turning an
- * automatic default into an explicit value on the next submission.
+ * Supply core's repeated email value from the single cleaned email input.
  *
  * @package local_libreria
  * @copyright 2026 Libreria de Satoshi
  * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class signup_text extends \MoodleQuickForm_text {
+final class signup_email_confirmation extends \MoodleQuickForm_hidden {
     /**
-     * Supply defaults from Moodle's cleaned submission for validation and saving.
+     * Ignore any stale or supplied email2 value, including after validation errors.
      *
      * @param array $submitvalues Cleaned values supplied by QuickForm.
      * @param bool $assoc Whether to return an associative array.
-     * @return mixed The explicit value or its default.
+     * @return mixed The email address in the requested export format.
      */
     public function exportValue(&$submitvalues, $assoc = false) { // phpcs:ignore moodle.NamingConventions.ValidFunctionName
-        $value = parent::exportValue($submitvalues, false);
-        if ($value !== null && (!is_string($value) || trim($value) !== '')) {
-            return $this->_prepareValue($value, $assoc);
-        }
-
         $email = $submitvalues['email'] ?? '';
-        if (!is_string($email)) {
-            return $this->_prepareValue($value, $assoc);
-        }
-        $email = trim($email);
-        $defaults = [
-            'username' => \core_text::strtolower($email),
-            'firstname' => clean_param($email, \core_user::get_property_type('firstname')),
-            'lastname' => '.',
-        ];
-        return $this->_prepareValue($defaults[$this->getName()], $assoc);
+        return $this->_prepareValue(is_string($email) ? trim($email) : '', $assoc);
     }
 }
