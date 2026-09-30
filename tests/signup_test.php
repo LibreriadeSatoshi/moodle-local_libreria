@@ -139,10 +139,12 @@ final class signup_test extends \advanced_testcase {
     }
 
     /**
-     * A mistyped optional confirmation must still be rejected by Moodle.
+     * The removed repeated-email input must not affect signup, even if a stale client posts it.
      */
-    public function test_email_confirmation_mismatch_is_rejected(): void {
-        $this->assert_field_error($this->submit(['email2' => 'different@example.com']), 'email2');
+    public function test_email_confirmation_is_derived_from_email(): void {
+        $user = $this->submit(['email2' => 'different@example.com'])->get_data();
+        $this->assertNotNull($user);
+        $this->assertSame($user->email, $user->email2);
     }
 
     /**
@@ -269,9 +271,10 @@ final class signup_test extends \advanced_testcase {
         @$document->loadHTML($form->render());
         $xpath = new \DOMXPath($document);
         $this->assertEquals(1, $xpath->query('//details[not(@open)]')->length);
-        foreach (['username', 'firstname', 'lastname', 'email2', 'city', 'country'] as $name) {
+        foreach (['username', 'firstname', 'lastname', 'city', 'country'] as $name) {
             $this->assertEquals(1, $xpath->query('//details//*[@name="' . $name . '"]')->length, $name);
         }
+        $this->assertEquals(0, $xpath->query('//input[@name="email2" and not(@type="hidden")]')->length);
         foreach (['email', 'password'] as $name) {
             $this->assertEquals(0, $xpath->query('//details//*[@name="' . $name . '"]')->length, $name);
         }
@@ -281,11 +284,99 @@ final class signup_test extends \advanced_testcase {
      * Validation errors in optional fields are not hidden inside a closed section.
      */
     public function test_failed_submission_expands_details(): void {
-        $form = $this->submit(['email2' => 'different@example.com']);
+        $this->getDataGenerator()->create_user(['username' => 'existingstudent']);
+        $form = $this->submit(['username' => 'existingstudent']);
         $this->assertNull($form->get_data());
         $document = new \DOMDocument();
         @$document->loadHTML($form->render());
         $xpath = new \DOMXPath($document);
         $this->assertEquals(1, $xpath->query('//details[@open]')->length);
     }
+
+    /**
+     * Optional custom fields share one native details section with standard fields.
+     */
+    public function test_optional_custom_fields_share_one_section(): void {
+        $gender = $this->getDataGenerator()->create_custom_profile_field([
+            'datatype' => 'menu', 'shortname' => 'gender', 'name' => 'Gender',
+            'signup' => 1, 'required' => 0, 'param1' => "Prefer not to answer\nAnother answer",
+            'defaultdata' => 'Prefer not to answer',
+        ]);
+        $form = new \login_signup_form();
+        $document = new \DOMDocument();
+        @$document->loadHTML($form->render());
+        $xpath = new \DOMXPath($document);
+        $this->assertEquals(1, $xpath->query('//details[not(@open)]')->length);
+        $this->assertEquals(1, $xpath->query('//details//select[@name="profile_field_gender"]')->length);
+        $this->assertEquals(0, $xpath->query('//fieldset//details')->length);
+        $this->assertEquals(0, $xpath->query('//fieldset[@id="id_category_' . $gender->categoryid . '"]')->length);
+        $this->assertEquals(0, $xpath->query('//details//button[@type="submit"]')->length);
+        $this->assertEquals(0, $xpath->query('//details//input[@name="email2"]')->length);
+
+        $user = $this->submit(['profile_field_gender' => 'Another answer'])->get_data();
+        $this->assertNotNull($user);
+        $this->assertSame('Another answer', $user->profile_field_gender);
+    }
+
+    /**
+     * CAPTCHA is outside the custom category and must not retain an empty header.
+     */
+    public function test_optional_category_removed_before_captcha(): void {
+        set_config('recaptchapublickey', 'test-public-key');
+        set_config('recaptchaprivatekey', 'test-private-key');
+        set_config('recaptcha', 1, 'auth_email');
+        $field = $this->getDataGenerator()->create_custom_profile_field([
+            'datatype' => 'text', 'shortname' => 'interests', 'name' => 'Interests',
+            'signup' => 1, 'required' => 0,
+        ]);
+        $document = new \DOMDocument();
+        @$document->loadHTML((new \login_signup_form())->render());
+        $xpath = new \DOMXPath($document);
+        $this->assertEquals(0, $xpath->query('//fieldset[@id="id_category_' . $field->categoryid . '"]')->length);
+        $this->assertEquals(1, $xpath->query('//details//*[@name="profile_field_interests"]')->length);
+        $this->assertEquals(0, $xpath->query('//details//*[@id="fitem_id_recaptcha_element"]')->length);
+        $this->assertEquals(1, $xpath->query('//*[@id="fitem_id_recaptcha_element"]')->length);
+    }
+
+    /**
+     * Required custom fields keep their category and validation outside optional details.
+     */
+    public function test_required_custom_fields_remain_outside_details(): void {
+        $required = $this->getDataGenerator()->create_custom_profile_field([
+            'datatype' => 'text', 'shortname' => 'organisation', 'name' => 'Organisation',
+            'signup' => 1, 'required' => 1,
+        ]);
+        $this->getDataGenerator()->create_custom_profile_field([
+            'datatype' => 'text', 'shortname' => 'interests', 'name' => 'Interests',
+            'signup' => 1, 'required' => 0, 'categoryid' => $required->categoryid,
+        ]);
+        $form = new \login_signup_form();
+        $document = new \DOMDocument();
+        @$document->loadHTML($form->render());
+        $xpath = new \DOMXPath($document);
+        $this->assertEquals(0, $xpath->query('//fieldset//details')->length);
+        $this->assertEquals(0, $xpath->query('//details//*[@name="profile_field_organisation"]')->length);
+        $this->assertEquals(1, $xpath->query('//details//*[@name="profile_field_interests"]')->length);
+        $this->assertEquals(1, $xpath->query('//fieldset[@id="id_category_' . $required->categoryid . '"]')->length);
+        $this->assert_field_error($this->submit(), 'profile_field_organisation');
+        $this->assertNotNull($this->submit(['profile_field_organisation' => 'School'])->get_data());
+    }
+
+    /**
+     * Switching the feature off keeps the repeated email field and custom categories.
+     */
+    public function test_disabled_feature_keeps_custom_fields_layout(): void {
+        set_config('simplifiedsignup', 0, 'local_libreria');
+        $field = $this->getDataGenerator()->create_custom_profile_field([
+            'datatype' => 'text', 'shortname' => 'interests', 'name' => 'Interests', 'signup' => 1,
+        ]);
+        $form = new \login_signup_form();
+        $document = new \DOMDocument();
+        @$document->loadHTML($form->render());
+        $xpath = new \DOMXPath($document);
+        $this->assertEquals(0, $xpath->query('//details')->length);
+        $this->assertEquals(1, $xpath->query('//input[@name="email2" and @type="text"]')->length);
+        $this->assertEquals(1, $xpath->query('//fieldset[@id="id_category_' . $field->categoryid . '"]')->length);
+    }
+
 }
