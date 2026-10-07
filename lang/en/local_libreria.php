@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['additionaldetails'] = 'Additional details (optional)';
 $string['pluginname'] = 'Librería de Satoshi tweaks';
+$string['privacy:metadata'] = 'The Librería de Satoshi tweaks plugin does not store personal data. Signup data is stored and managed by Moodle core.';
 $string['pseudonote'] = 'You may use a pseudonym instead of your real name. Whatever you enter here is what will appear on your course certificates.';
 $string['signupdefaults'] = 'Leave these fields blank to use your email as your username and display name, and a dot (.) as your last name. Your display name is visible to other participants.';
 $string['simplifiedsignup'] = 'Simplified email signup';
