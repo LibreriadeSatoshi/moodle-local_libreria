@@ -31,7 +31,7 @@ final class signup {
      */
     public static function extend_form(\MoodleQuickForm $mform): void {
         $mform->updateAttributes(['class' => $mform->getAttribute('class') . ' local-libreria-simplified-signup']);
-        $optional = ['username', 'firstname', 'lastname', 'city', 'country'];
+        $optional = ['username', 'firstname', 'lastname', 'city'];
         $elements = [];
         foreach ($optional as $name) {
             $element = $mform->removeElement($name, false);
@@ -50,6 +50,9 @@ final class signup {
         }
         // QuickForm tracks the required marker separately from validation rules.
         $mform->_required = array_values(array_diff($mform->_required, $optional));
+
+        // Keep country visible and require it in both browser and server validation.
+        $mform->addRule('country', get_string('required'), 'required', null, 'client');
 
         // Core signup validation expects email2 even though users only enter email once.
         $mform->removeElement('email2');

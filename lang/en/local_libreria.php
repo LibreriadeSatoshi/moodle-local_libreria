@@ -30,4 +30,4 @@ $string['privacy:metadata'] = 'The Librería de Satoshi tweaks plugin does not s
 $string['pseudonote'] = 'You may use a pseudonym instead of your real name. Whatever you enter here is what will appear on your course certificates.';
 $string['signupdefaults'] = 'Leave these fields blank to use your email as your username and display name, and a dot (.) as your last name. Your display name is visible to other participants.';
 $string['simplifiedsignup'] = 'Simplified email signup';
-$string['simplifiedsignup_desc'] = 'Show email and password first, with optional standard and custom profile fields in one collapsed section and no repeated email input. Enable "Allow extended characters in usernames" to support full email addresses, including + addresses. Existing accounts and email confirmation are unchanged.';
+$string['simplifiedsignup_desc'] = 'Require email, password and country, with optional standard and custom profile fields in one collapsed section and no repeated email input. Enable "Allow extended characters in usernames" to support full email addresses, including + addresses. Existing accounts and email confirmation are unchanged.';
