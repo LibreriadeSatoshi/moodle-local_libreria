@@ -60,7 +60,7 @@ final class signup_test extends \advanced_testcase {
             'lastname' => '',
             'email2' => '',
             'city' => '',
-            'country' => '',
+            'country' => 'CL',
         ], $overrides));
         return new \login_signup_form();
     }
@@ -87,7 +87,7 @@ final class signup_test extends \advanced_testcase {
         global $DB, $SESSION;
         $form = $this->submit();
         $user = $form->get_data();
-        $this->assertNotNull($user, 'Email and password alone must pass the real signup validation.');
+        $this->assertNotNull($user, 'Email, password and country must pass the real signup validation.');
         $this->assertSame('student+course@example.com', $user->username);
         $this->assertSame('Student+course@example.com', $user->firstname);
         $this->assertSame('.', $user->lastname);
@@ -101,6 +101,7 @@ final class signup_test extends \advanced_testcase {
         $auth->user_signup($user, false);
         $saved = $DB->get_record('user', ['username' => 'student+course@example.com'], '*', MUST_EXIST);
         $this->assertEquals(0, $saved->confirmed);
+        $this->assertSame('CL', $saved->country);
         $this->assertCount(1, $sink->get_messages());
         $this->assertSame('Student+course@example.com', $sink->get_messages()[0]->to);
         $this->assertSame($SESSION->wantsurl, get_user_preferences('auth_email_wantsurl', null, $saved));
@@ -145,6 +146,23 @@ final class signup_test extends \advanced_testcase {
         $user = $this->submit(['email2' => 'different@example.com'])->get_data();
         $this->assertNotNull($user);
         $this->assertSame($user->email, $user->email2);
+    }
+
+    /**
+     * Leaving the country placeholder selected must prevent registration.
+     */
+    public function test_blank_country_is_rejected(): void {
+        $this->assert_field_error($this->submit(['country' => '']), 'country');
+    }
+
+    /**
+     * Omitting country from a request must not bypass server-side validation.
+     */
+    public function test_missing_country_is_rejected(): void {
+        \login_signup_form::mock_submit([
+            'email' => 'student@example.com', 'password' => 'Learning!123',
+        ]);
+        $this->assert_field_error(new \login_signup_form(), 'country');
     }
 
     /**
@@ -201,7 +219,7 @@ final class signup_test extends \advanced_testcase {
      */
     public function test_partial_details_and_missing_inputs(): void {
         \login_signup_form::mock_submit([
-            'email' => 'student@example.com', 'password' => 'Learning!123', 'firstname' => 'Ada',
+            'email' => 'student@example.com', 'password' => 'Learning!123', 'firstname' => 'Ada', 'country' => 'CL',
         ]);
         $user = (new \login_signup_form())->get_data();
         $this->assertNotNull($user);
@@ -271,13 +289,14 @@ final class signup_test extends \advanced_testcase {
         @$document->loadHTML($form->render());
         $xpath = new \DOMXPath($document);
         $this->assertEquals(1, $xpath->query('//details[not(@open)]')->length);
-        foreach (['username', 'firstname', 'lastname', 'city', 'country'] as $name) {
+        foreach (['username', 'firstname', 'lastname', 'city'] as $name) {
             $this->assertEquals(1, $xpath->query('//details//*[@name="' . $name . '"]')->length, $name);
         }
         $this->assertEquals(0, $xpath->query('//input[@name="email2" and not(@type="hidden")]')->length);
-        foreach (['email', 'password'] as $name) {
+        foreach (['email', 'password', 'country'] as $name) {
             $this->assertEquals(0, $xpath->query('//details//*[@name="' . $name . '"]')->length, $name);
         }
+        $this->assertNotNull($document->getElementById('id_country'));
     }
 
     /**

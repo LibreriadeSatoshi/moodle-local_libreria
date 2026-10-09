@@ -6,11 +6,12 @@ a git submodule at `public/local/libreria` in
 
 ## Simplified email signup
 
-An optional setting keeps **email and password** visible and moves username,
-first name, last name, city, country and optional custom profile fields into a collapsed
+An optional setting keeps **email, password and country** visible and required, and moves username,
+first name, last name, city and optional custom profile fields into a collapsed
 **Additional details (optional)** section. It uses native HTML details, so it
-works with the keyboard and without JavaScript. The section opens after a
-submission to expose validation errors.
+works with the keyboard and without JavaScript. Country is required in both browser
+and server-side validation. The section opens after a submission to expose
+validation errors.
 
 Blank standard fields receive these server-side defaults before Moodle validates
 the form:
@@ -93,7 +94,8 @@ invalid email, password policy, consent, session keys, feature disablement and
 the collapsed/expanded form structure.
 
 Before enabling on a site, check desktop and mobile signup with its theme: submit
-only email/password, follow the confirmation link, log out and log in again.
+only email/password/country, follow the confirmation link, log out and log in again.
+Leave country unselected and confirm that signup is rejected with a visible error.
 Expand the details and repeat using a custom username and names. Check that optional
 custom fields appear in the same section and required custom fields remain visible
 and enforce their validation. Confirm there is no repeated email input. Test keyboard interaction
