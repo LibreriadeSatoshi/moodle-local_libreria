@@ -91,6 +91,13 @@ final class signup {
         $before = $mform->elementExists('passwordpolicyinfo') ? 'passwordpolicyinfo' : 'password';
         $emailelement = $mform->removeElement('email', false);
         $mform->insertElementBefore($emailelement, $before);
+        // Phones show the @ keyboard and password managers recognise the field. It stays a text element: Moodle
+        // draws its errors through the text template, which an email type would bypass.
+        $emailelement->updateAttributes([
+            'inputmode' => 'email', 'autocomplete' => 'email', 'autocapitalize' => 'none', 'spellcheck' => 'false',
+        ]);
+
+
 
         // Native details remains keyboard accessible and usable without JavaScript.
         // Open it on a submitted form so optional-field errors are always visible.
@@ -125,6 +132,22 @@ final class signup {
             } else {
                 $mform->addElement($details[$index]);
             }
+        }
+
+        // What happens next, just above the submit button (core adds it after this callback). Before any remaining
+        // custom field category, so the note never becomes part of one.
+        $note = $mform->createElement('static', 'local_libreria_confirmnote', '', get_string('confirmnote', 'local_libreria'));
+        $firstheader = null;
+        foreach ($mform->_elements as $element) {
+            if ($element->getType() === 'header') {
+                $firstheader = $element->getName();
+                break;
+            }
+        }
+        if ($firstheader !== null) {
+            $mform->insertElementBefore($note, $firstheader);
+        } else {
+            $mform->addElement($note);
         }
     }
 }

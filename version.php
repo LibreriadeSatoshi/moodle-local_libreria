@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_libreria';
-$plugin->version   = 2026102100;
+$plugin->version   = 2026102200;
 $plugin->requires  = 2022112800;
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '0.3.0';
+$plugin->release   = '0.4.0';

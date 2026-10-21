@@ -24,10 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['additionaldetails'] = 'Additional details (optional)';
+$string['additionaldetails'] = 'More about you (optional)';
+$string['confirmnote'] = 'We\'ll send you an email to confirm your account.';
 $string['pluginname'] = 'Librería de Satoshi tweaks';
 $string['privacy:metadata'] = 'The Librería de Satoshi tweaks plugin does not store personal data. Signup data is stored and managed by Moodle core.';
 $string['pseudonote'] = 'You may use a pseudonym instead of your real name. Whatever you enter here is what will appear on your course certificates.';
-$string['signupdefaults'] = 'Leave these fields blank to use your email as your username, the part of your email before the @ as your display name, and a dot (.) as your last name. Your display name is visible to other participants.';
+$string['signupdefaults'] = 'First name, last name, username, city, country and other profile details. You can fill them in now or later in your profile. If you leave your name blank, we show the part of your email before the @. Your name is visible to other participants.';
 $string['simplifiedsignup'] = 'Simplified email signup';
 $string['simplifiedsignup_desc'] = 'Require only email and password, with optional standard and custom profile fields in one collapsed section and no repeated email input. Enable "Allow extended characters in usernames" to support full email addresses, including + addresses. Existing accounts and email confirmation are unchanged.';
