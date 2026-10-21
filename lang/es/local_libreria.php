@@ -24,9 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['additionaldetails'] = 'Datos adicionales (opcional)';
+$string['additionaldetails'] = 'Más sobre ti (opcional)';
+$string['confirmnote'] = 'Te enviaremos un correo para confirmar tu cuenta.';
 $string['pluginname'] = 'Ajustes de Librería de Satoshi';
 $string['pseudonote'] = 'Puedes usar un pseudónimo en lugar de tu nombre real. Lo que escribas aquí es lo que aparecerá en tus certificados.';
-$string['signupdefaults'] = 'Deja estos campos vacíos para usar tu correo como nombre de usuario, la parte de tu correo antes de la @ como nombre visible, y un punto (.) como apellido. Tu nombre es visible para otros participantes.';
+$string['signupdefaults'] = 'Nombre, apellido, nombre de usuario, ciudad, país y otros datos del perfil. Puedes completarlos ahora o más tarde en tu perfil. Si no pones tu nombre, mostraremos la parte de tu correo antes de la @. Tu nombre es visible para otros participantes.';
 $string['simplifiedsignup'] = 'Registro simplificado por correo';
 $string['simplifiedsignup_desc'] = 'Requiere solo correo y contraseña, con los campos opcionales estándar y personalizados en una sola sección contraída, sin repetir el correo. Activa "Permitir caracteres extendidos en nombres de usuario" para admitir direcciones completas, incluidas las que contienen +. Las cuentas existentes y la confirmación por correo no cambian.';

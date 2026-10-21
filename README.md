@@ -8,9 +8,9 @@ a git submodule at `public/local/libreria` in
 
 An optional setting keeps only **email and password** visible and required, and moves
 username, first name, last name, city, country and optional custom profile fields into a
-collapsed **Additional details (optional)** section. It uses native HTML details, so it
+collapsed **More about you (optional)** section. It uses native HTML details, so it
 works with the keyboard and without JavaScript. The section opens after a submission to
-expose validation errors.
+expose validation errors. The email field carries `inputmode="email"` and `autocomplete="email"`, and a short note above the submit button says a confirmation email follows.
 
 Blank standard fields receive these server-side defaults before Moodle validates
 the form:

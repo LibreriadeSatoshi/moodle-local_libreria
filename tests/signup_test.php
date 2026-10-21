@@ -304,6 +304,19 @@ final class signup_test extends \advanced_testcase {
         foreach (['email', 'password'] as $name) {
             $this->assertEquals(0, $xpath->query('//details//*[@name="' . $name . '"]')->length, $name);
         }
+
+        // The email field tells phones and password managers it holds an email.
+        $email = $document->getElementById('id_email');
+        $this->assertSame('email', $email->getAttribute('inputmode'));
+        $this->assertSame('email', $email->getAttribute('autocomplete'));
+        $this->assertSame('none', $email->getAttribute('autocapitalize'));
+
+        // The section names what it holds, and the note says what happens next.
+        $this->assertSame(get_string('additionaldetails', 'local_libreria'),
+            trim($xpath->query('//details/summary')->item(0)->textContent));
+        $this->assertStringContainsString(get_string('confirmnote', 'local_libreria'), $document->textContent);
+        $this->assertEquals(0, $xpath->query('//details//*[contains(text(), "' .
+            get_string('confirmnote', 'local_libreria') . '")]')->length);
     }
 
     /**
