@@ -49,9 +49,13 @@ final class signup_text extends \MoodleQuickForm_text {
             return $this->_prepareValue($value, $assoc);
         }
         $email = trim($email);
+        // The display name is the part of the address before the @, so the full email is never shown.
+        $at = \core_text::strrpos($email, '@');
+        $localpart = $at === false ? $email : \core_text::substr($email, 0, $at);
+        $firstname = trim(clean_param($localpart, \core_user::get_property_type('firstname')));
         $defaults = [
             'username' => \core_text::strtolower($email),
-            'firstname' => clean_param($email, \core_user::get_property_type('firstname')),
+            'firstname' => $firstname !== '' ? $firstname : clean_param($email, \core_user::get_property_type('firstname')),
             'lastname' => '.',
         ];
         return $this->_prepareValue($defaults[$this->getName()], $assoc);
